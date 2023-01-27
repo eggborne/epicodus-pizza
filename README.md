@@ -31,10 +31,35 @@ This software has no license.
 
 ### Tests
 
-> Describe:
+> Describe: Pizza()
 
 ```
-Test: ""
-Code: ;
-Expected Output: 
+Test: "It should produce a Pizza object with the specified options"
+Code: {
+  const pizza = new Pizza({
+    size: 'large',
+    crust: 'handTossed',
+    toppings: ['redPeppers', 'pineapple'],
+    specialInstructions: ['well done']
+  });
+  return [ pizza.size, pizza.crust, pizza.toppings, pizza.specialInstructions ];
+}
+Expected Output: [ "large", "handTossed", [ "redPeppers", "pineapple" ], [ "well done" ] ]
+
+Test: "It should produce a Pizza object that can refer to its own properties to find the extra charge associated with different options"
+Code: {
+  const pizza = new Pizza({
+    size: 'large',
+    crust: 'deepDish',
+    toppings: ['redPeppers', 'pineapple'],
+    specialInstructions: ['well done']
+  });
+  return [ 
+    pizza.priceData.sizes[pizza.size], 
+    pizza.priceData.crusts[pizza.crust], 
+    pizza.priceData.toppings[pizza.toppingData[pizza.toppings[0]].type][pizza.size], 
+    pizza.priceData.toppings[pizza.toppingData[pizza.toppings[1]].type][pizza.size], 
+  ];
+}
+Expected Output: [ 12.95, 2, 2.5, 3.5 ]
 ```
