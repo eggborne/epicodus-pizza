@@ -46,7 +46,58 @@ Code: {
 }
 Expected Output: [ "large", "handTossed", [ "redPeppers", "pineapple" ], [ "well done" ] ]
 
-Test: "It should produce a Pizza object that can refer to its own properties to find the extra charge associated with different options"
+Test: "It should produce a Pizza object that can refer to its own optionData property to find the human-readable display names of toppings and crust types"
+Code: {
+  const pizza = new Pizza({
+    size: 'large',
+    crust: 'deepDish',
+    toppings: ['redPeppers', 'pineapple'],
+    specialInstructions: ['well done']
+  });
+  return [ pizza.optionData.toppings['onions'].displayName, pizza.optionData.crusts['handTossed'].displayName ];
+}
+Expected Output: [ "Onions", "Deep Dish" ]
+
+Test: "It should produce a Pizza object that can refer to its own priceData property to find the prices for a given size and crust type"
+Code: {
+  const pizza = new Pizza({
+    size: 'large',
+    crust: 'deepDish',
+    toppings: ['redPeppers', 'pineapple'],
+    specialInstructions: ['well done']
+  });
+  return [ pizza.priceData.sizes['medium'], pizza.priceData.crusts['thin'] ];
+}
+Expected Output: [ 9.95, 1 ]
+
+Test: "It should produce a Pizza object that can find the type (standard or premium) of a given topping"
+Code: {
+  const pizza = new Pizza({
+    size: 'large',
+    crust: 'deepDish',
+    toppings: ['redPeppers', 'pineapple'],
+    specialInstructions: ['well done']
+  });
+  return [ pizza.optionData.toppings['spinach'].type, pizza.optionData.toppings['falafel'].type];
+}
+Expected Output: [ 'standard', 'premium' ]
+
+Test: "It should produce a Pizza object that can find the price for a given topping on a given size"
+Code: {
+  const pizza = new Pizza({
+    size: 'large',
+    crust: 'deepDish',
+    toppings: ['redPeppers', 'pineapple'],
+    specialInstructions: ['well done']
+  });
+  return [ 
+    pizza.priceData.toppings[pizza.optionData.toppings['blackOlives'].type]['small'], 
+    pizza.priceData.toppings[pizza.optionData.toppings['pineapple'].type]['large']
+  ];
+}
+Expected Output: [ 0.95, 3.50 ]
+
+Test: "It should produce a Pizza object that can refer to its own properties to find the prices associated with its own user-set options"
 Code: {
   const pizza = new Pizza({
     size: 'large',
@@ -57,8 +108,8 @@ Code: {
   return [ 
     pizza.priceData.sizes[pizza.size], 
     pizza.priceData.crusts[pizza.crust], 
-    pizza.priceData.toppings[pizza.toppingData[pizza.toppings[0]].type][pizza.size], 
-    pizza.priceData.toppings[pizza.toppingData[pizza.toppings[1]].type][pizza.size], 
+    pizza.priceData.toppings[pizza.optionData.toppings[pizza.toppings[0]].type][pizza.size], 
+    pizza.priceData.toppings[pizza.optionData.toppings[pizza.toppings[1]].type][pizza.size], 
   ];
 }
 Expected Output: [ 12.95, 2, 2.5, 3.5 ]
