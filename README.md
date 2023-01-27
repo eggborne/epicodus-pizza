@@ -34,7 +34,7 @@ This software has no license.
 > Describe: Pizza()
 
 ```
-Test: "It should produce a Pizza object with the specified options"
+Test: "It should produce a Pizza object with the specified options as properties"
 Code: {
   const pizza = new Pizza({
     size: 'large',
@@ -44,27 +44,25 @@ Code: {
   });
   return [ pizza.size, pizza.crust, pizza.toppings, pizza.specialInstructions ];
 }
-Expected Output: [ "large", "handTossed", [ "redPeppers", "pineapple" ], [ "well done" ] ]
+Expected Output: [ 
+  "large", 
+  "handTossed", 
+  [ "redPeppers", "pineapple" ], 
+  [ "well done" ] 
+]
 
-Test: "It should produce a Pizza object that can refer to its own optionData property to find the non-camelCase display names of toppings and crust types"
+Test: "It should produce a Pizza object that can find the non-camelCase display names of toppings and crust types"
 Code: {
-  const pizza = new Pizza({
-    size: 'large',
-    crust: 'deepDish',
-    toppings: ['redPeppers', 'pineapple'],
-    specialInstructions: ['well done']
-  });
-  return [ pizza.optionData.toppings['redPeppers'].displayName, pizza.optionData.crusts['handTossed'].displayName ];
+  const pizza = new Pizza();
+  return [ pizza.optionData.toppings['greenPeppers'].displayName, pizza.optionData.toppings['skittles'].displayName, pizza.optionData.crusts['handTossed'].displayName ];
 }
-Expected Output: [ "Red Peppers", "Deep Dish" ]
+Expected Output: [ 'Green Peppers', 'Skittles®', 'Hand-Tossed' ]
 
-Test: "It should produce a Pizza object that can refer to its own priceData property to find the prices for a given size and crust type"
+Test: "It should produce a Pizza object that can find the price for a given size and crust type"
 Code: {
   const pizza = new Pizza({
     size: 'large',
     crust: 'deepDish',
-    toppings: ['redPeppers', 'pineapple'],
-    specialInstructions: ['well done']
   });
   return [ pizza.priceData.sizes['medium'], pizza.priceData.crusts['thin'] ];
 }
@@ -72,24 +70,14 @@ Expected Output: [ 9.95, 1 ]
 
 Test: "It should produce a Pizza object that can find the type (standard or premium) of a given topping"
 Code: {
-  const pizza = new Pizza({
-    size: 'large',
-    crust: 'deepDish',
-    toppings: ['redPeppers', 'pineapple'],
-    specialInstructions: ['well done']
-  });
+  const pizza = new Pizza();
   return [ pizza.optionData.toppings['spinach'].type, pizza.optionData.toppings['falafel'].type];
 }
 Expected Output: [ 'standard', 'premium' ]
 
 Test: "It should produce a Pizza object that can find the price for a given topping at a given size"
 Code: {
-  const pizza = new Pizza({
-    size: 'large',
-    crust: 'deepDish',
-    toppings: ['redPeppers', 'pineapple'],
-    specialInstructions: ['well done']
-  });
+  const pizza = new Pizza();
   return [ 
     pizza.priceData.toppings[pizza.optionData.toppings['blackOlives'].type]['small'], 
     pizza.priceData.toppings[pizza.optionData.toppings['pineapple'].type]['large']
@@ -103,7 +91,6 @@ Code: {
     size: 'large',
     crust: 'deepDish',
     toppings: ['redPeppers', 'pineapple'],
-    specialInstructions: ['well done']
   });
   return [ 
     pizza.priceData.sizes[pizza.size], 
@@ -115,26 +102,60 @@ Code: {
 Expected Output: [ 12.95, 2, 2.5, 3.5 ]
 ```
 
-
-> Describe: Pizza.prototype.getPrice()
+> Describe: Pizza.prototype.getPriceTotal()
 
 ```
-Test: "It should output the correct base price for a given pizza size"
+Test: "It should output the correct price for a given pizza size"
 Code: {
   let smallPizza = new Pizza({
     size: 'small',
-    crust: 'handTossed',
-    toppings: [],
-    specialInstructions: []
   });
   let largePizza = new Pizza({
     size: 'large',
-    crust: 'handTossed',
-    toppings: [],
-    specialInstructions: []
   });
-  return [smallPizza.getPrice(), largePizza.getPrice()];
+  return [smallPizza.getPriceTotal(), largePizza.getPriceTotal()];
 }
 Expected Output: [ 7.95, 12.95 ]
+
+Test: "It should output the correct price for a given pizza crust type"
+Code: {
+  let pizza = new Pizza({
+    size: 'large',
+    crust: 'handTossed',
+  });
+  let deepDishPizza = new Pizza({
+    size: 'large',
+    crust: 'deepDish',
+  });
+  return [pizza.getPriceTotal(), deepDishPizza.getPriceTotal()];
+}
+Expected Output: [ 12.95, 14.95 ]
+
+Test: "It should output the correct price for a pizza of given size, crust type, and toppings"
+Code: {
+  let smallPlainPizza = new Pizza({
+    size: 'small',
+  });
+  let mediumThinCrustPizza = new Pizza({
+    size: 'medium',
+    crust: 'thin',
+  });
+  let largeSpinachPizza = new Pizza({
+    size: 'large',
+    toppings: ['spinach'],
+  });
+  let largeDeepDishGarlicFalafelPizza = new Pizza({
+    size: 'large',
+    crust: 'deepDish',
+    toppings: ['garlic', 'falafel'],
+  });
+  return [
+    smallPlainPizza.getPriceTotal(), 
+    mediumThinCrustPizza.getPriceTotal(),
+    largeSpinachPizza.getPriceTotal(), 
+    largeDeepDishGarlicFalafelPizza.getPriceTotal(),
+  ];
+}
+Expected Output: [ 7.95, 10.95, 15.45, 20.95 ]
 
 ```

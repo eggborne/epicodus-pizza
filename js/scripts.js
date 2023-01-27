@@ -1,8 +1,8 @@
-function Pizza(options) {
-  this.size = options.size;
-  this.crust = options.crust;
-  this.toppings = options.toppings;
-  this.specialInstructions = options.specialInstructions;
+function Pizza(options={}) {
+  this.size = options.size || 'large';
+  this.crust = options.crust || 'handTossed';
+  this.toppings = options.toppings || [];
+  this.specialInstructions = options.specialInstructions || [];
 
   this.optionData = {
     toppings: {
@@ -86,8 +86,7 @@ function Pizza(options) {
   };
 }
 
-Pizza.prototype.getPrice = function() {
-  let price = 0;
+Pizza.prototype.getPriceTotal = function() {
   let baseSizeCost = this.priceData.sizes[this.size];
   let baseCrustCost = this.priceData.crusts[this.crust];
   let toppingsCost = 0;
@@ -95,6 +94,5 @@ Pizza.prototype.getPrice = function() {
     let toppingType = this.optionData.toppings[topping].type;
     toppingsCost += this.priceData.toppings[toppingType][this.size];
   });
-  price = baseSizeCost + baseCrustCost + toppingsCost;
-  return price;
+  return baseSizeCost + baseCrustCost + toppingsCost;
 } 
