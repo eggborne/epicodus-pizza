@@ -88,6 +88,13 @@ function Pizza(options) {
 
 Pizza.prototype.getPrice = function() {
   let price = 0;
-  
+  let baseSizeCost = this.priceData.sizes[this.size];
+  let baseCrustCost = this.priceData.crusts[this.crust];
+  let toppingsCost = 0;
+  this.toppings.forEach((topping) => {
+    let toppingType = this.optionData.toppings[topping].type;
+    toppingsCost += this.priceData.toppings[toppingType][this.size];
+  });
+  price = baseSizeCost + baseCrustCost + toppingsCost;
   return price;
 } 

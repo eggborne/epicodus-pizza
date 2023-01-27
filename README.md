@@ -46,7 +46,7 @@ Code: {
 }
 Expected Output: [ "large", "handTossed", [ "redPeppers", "pineapple" ], [ "well done" ] ]
 
-Test: "It should produce a Pizza object that can refer to its own optionData property to find the human-readable display names of toppings and crust types"
+Test: "It should produce a Pizza object that can refer to its own optionData property to find the non-camelCase display names of toppings and crust types"
 Code: {
   const pizza = new Pizza({
     size: 'large',
@@ -54,9 +54,9 @@ Code: {
     toppings: ['redPeppers', 'pineapple'],
     specialInstructions: ['well done']
   });
-  return [ pizza.optionData.toppings['onions'].displayName, pizza.optionData.crusts['handTossed'].displayName ];
+  return [ pizza.optionData.toppings['redPeppers'].displayName, pizza.optionData.crusts['handTossed'].displayName ];
 }
-Expected Output: [ "Onions", "Deep Dish" ]
+Expected Output: [ "Red Peppers", "Deep Dish" ]
 
 Test: "It should produce a Pizza object that can refer to its own priceData property to find the prices for a given size and crust type"
 Code: {
@@ -82,7 +82,7 @@ Code: {
 }
 Expected Output: [ 'standard', 'premium' ]
 
-Test: "It should produce a Pizza object that can find the price for a given topping on a given size"
+Test: "It should produce a Pizza object that can find the price for a given topping at a given size"
 Code: {
   const pizza = new Pizza({
     size: 'large',
@@ -97,7 +97,7 @@ Code: {
 }
 Expected Output: [ 0.95, 3.50 ]
 
-Test: "It should produce a Pizza object that can refer to its own properties to find the prices associated with its own user-set options"
+Test: "It should produce a Pizza object that can find the prices associated with its user-set options"
 Code: {
   const pizza = new Pizza({
     size: 'large',
@@ -113,4 +113,28 @@ Code: {
   ];
 }
 Expected Output: [ 12.95, 2, 2.5, 3.5 ]
+```
+
+
+> Describe: Pizza.prototype.getPrice()
+
+```
+Test: "It should output the correct base price for a given pizza size"
+Code: {
+  let smallPizza = new Pizza({
+    size: 'small',
+    crust: 'handTossed',
+    toppings: [],
+    specialInstructions: []
+  });
+  let largePizza = new Pizza({
+    size: 'large',
+    crust: 'handTossed',
+    toppings: [],
+    specialInstructions: []
+  });
+  return [smallPizza.getPrice(), largePizza.getPrice()];
+}
+Expected Output: [ 7.95, 12.95 ]
+
 ```
