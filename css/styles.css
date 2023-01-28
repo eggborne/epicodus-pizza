@@ -196,7 +196,60 @@ form > #option-input-area {
   background-color: #232;
   width: 100%;
   height: 100vw;
-  display: none;
+  display: none !important;
+}
+
+#invoice-area {
+  background-color: #232;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  /* padding: 1rem 2rem; */
+}
+
+.invoice {
+  background-color: rgb(4, 5, 4);
+  color: #aaa;
+  margin: 1rem 2rem;
+
+}
+
+.invoice-header {
+  background-color: rgb(40, 46, 31);
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+}
+
+.invoice-row, #grand-total-row {
+  display: flex;
+  justify-content: space-between
+}
+
+.invoice-title {
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+}
+
+.invoice-list {
+  width: 60%;
+  margin: 0 2.5rem 0.5rem 2.5rem;
+}
+
+.invoice-row > .invoice-row-price:not(.total) {
+  font-weight: normal;
+}
+
+.invoice-row.sublist {
+  font-weight: normal;
+  padding-left: 1.5rem;
+}
+
+#grand-total-row {
+  font-weight: bold;
+  background-color: rgb(27, 78, 24);
+  width: 100%;
+  padding: 1rem;
 }
 
 #total-price-display {

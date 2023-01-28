@@ -1,11 +1,10 @@
-let pizza;
-
 window.addEventListener('load', function() {
   document.getElementById('start-order-button').addEventListener('click', function(e) {
     e.preventDefault();
-    pizza = new Pizza();
+    let pizza = new Pizza();
     pizza.createOptionInputs();
     pizza.createOptionHandlers();
+    pizza.printInvoice();
     document.querySelector('header').classList.add('ordering');
     document.querySelector('main').classList.add('ordering');
   });
@@ -16,94 +15,41 @@ function Pizza(options={}) {
   this.crust = options.crust || 'handTossed';
   this.toppings = options.toppings || [];
   this.specialInstructions = options.specialInstructions || [];
-  this.currentPrice = 0;
-
   this.optionData = {
     sizes: {
-      small: {
-        displayName: 'Small'
-      },
-      medium: {
-        displayName: 'Medium'
-      },
-      large: {
-        displayName: 'Large'
-      },
+      small: { displayName: 'Small' },
+      medium: { displayName: 'Medium' }, 
+      large: { displayName: 'Large' },
     },
     toppings: {
       standard: {
-        greenPeppers: {
-          displayName: 'Green Peppers',
-        },
-        redPeppers: {
-          displayName: 'Red Peppers',
-        },
-        blackOlives: {
-          displayName: 'Black Olives',
-        },
-        spinach: {
-          displayName: 'Spinach',
-        },
-        garlic: {
-          displayName: 'Garlic',
-        },
-        onions: {
-          displayName: 'Onions',
-        },
-        jalapenos: {
-          displayName: 'Jalapenos',
-        },
+        greenPeppers: { displayName: 'Green Peppers', },
+        redPeppers: { displayName: 'Red Peppers', },
+        blackOlives: { displayName: 'Black Olives', },
+        spinach: { displayName: 'Spinach', },
+        garlic: { displayName: 'Garlic', },
+        onions: { displayName: 'Onions', },
+        jalapenos: { displayName: 'Jalapenos', },
       }, 
       premium: {
-        pineapple: {
-          displayName: 'Pineapple',
-          type: 'premium',
-        },
-        falafel: {
-          displayName: 'Falafel',
-          type: 'premium',
-        },
-        skittles: {
-          displayName: 'Skittles®',
-          type: 'premium',
-        },
+        pineapple: { displayName: 'Pineapple', },
+        falafel: { displayName: 'Falafel', },
+        skittles: { displayName: 'Skittles®', },
       }
     },
     crusts: {
-      handTossed: {
-        displayName: 'Hand-Tossed',
-      },
-      thin: {
-        displayName: 'Thin Crust',
-      },
-      deepDish: {
-        displayName: 'Deep Dish',
-      },
+      handTossed: { displayName: 'Hand-Tossed', },
+      thin: { displayName: 'Thin Crust', },
+      deepDish: { displayName: 'Deep Dish', },
     },
   },
 
   this.priceData = {
-    sizes: {
-      small: 7.95,
-      medium: 9.95,
-      large: 12.95,
-    },
-    crusts: {
-      handTossed: null,
-      thin: 1,
-      deepDish: 2,
-    },
-    toppings: {
-      standard: {
-        small: 0.95,
-        medium: 1.95,
-        large: 2.50,
-      },
-      premium: {
-        small: 1.95,
-        medium: 2.95,
-        large: 3.50,
-      }
+    sizes: { small: 7.95, medium: 9.95, large: 12.95, },
+    crusts: { handTossed: null, thin: 1, deepDish: 2, },
+    toppings: { 
+      standard: { small: 0.95, medium: 1.95, large: 2.50, },
+      premium: { small: 1.95, medium: 2.95, large: 3.50, }
     }
   };
 }
@@ -111,12 +57,21 @@ function Pizza(options={}) {
 Pizza.prototype.getPriceTotal = function() {
   let baseSizeCost = this.priceData.sizes[this.size];
   let baseCrustCost = this.priceData.crusts[this.crust];
+  let toppingsCost = this.getTotalToppingPrice();
+  return baseSizeCost + baseCrustCost + toppingsCost;
+}
+
+Pizza.prototype.getTotalToppingPrice = function() {
   let toppingsCost = 0;
   this.toppings.forEach((topping) => {
-    let toppingType =  topping in this.optionData.toppings.standard ? 'standard' : 'premium';
+    let toppingType = this.getToppingType(topping);
     toppingsCost += this.priceData.toppings[toppingType][this.size];
   });
-  return baseSizeCost + baseCrustCost + toppingsCost;
+  return toppingsCost;
+}
+
+Pizza.prototype.getToppingType = function(topping) {
+  return topping in this.optionData.toppings.standard ? 'standard' : 'premium';
 }
 
 Pizza.prototype.createOptionInputs = function() {
@@ -197,6 +152,7 @@ Pizza.prototype.createOptionHandlers = function() {
   document.getElementById('crust-select').addEventListener('change', (e) => {
     this.crust = e.target.value;
     document.querySelector('#total-price-display > span').innerText = this.getPriceTotal();
+    this.printInvoice();
   });
   let optionInputs = document.getElementsByTagName('input');
   for (const optionInput of optionInputs) {
@@ -213,6 +169,40 @@ Pizza.prototype.createOptionHandlers = function() {
         }
       }
       document.querySelector('#total-price-display > span').innerText = this.getPriceTotal().toFixed(2);
+      this.printInvoice();
     });
   }
+}
+
+Pizza.prototype.printInvoice = function() {
+  let size = this.optionData.sizes[this.size].displayName;
+  let crustStyle = this.optionData.crusts[this.crust].displayName;
+  let pizzaBasePrice = this.priceData.sizes[this.size] + this.priceData.crusts[this.crust];
+  let displayToppings = [];
+  this.toppings.forEach((topping) => {
+    let toppingType = this.getToppingType(topping);
+    displayToppings.push(this.optionData.toppings[toppingType][topping].displayName);
+  });
+
+  let invoiceHTML = `
+  <div class="invoice">
+    <div class="invoice-header invoice-row">
+      <h4>${size} ${crustStyle} Pizza</h4>
+      <p class="invoice-row-price">$${pizzaBasePrice.toFixed(2)}</p>
+    </div>
+    <div ${this.toppings.length === 0 ? 'style="display: none" ' : null} class="invoice-title invoice-row sublist">
+      <p>Toppings:</p>
+      <p class="invoice-row-price">$${this.getTotalToppingPrice().toFixed(2)}</p>
+    </div>
+    <div class="invoice-list">
+      ${displayToppings.sort().join(', ')}
+    </div>
+    <div class="invoice-title invoice-row total">
+      <p>Total:</p>
+      <p class="invoice-row-price total">$${this.getPriceTotal().toFixed(2)}</p>
+    </div>
+  </div>
+  `;
+  document.getElementById('invoice-area').innerHTML = invoiceHTML;
+  document.getElementById('grand-total-display').innerHTML = '$' + this.getPriceTotal().toFixed(2);
 }
