@@ -193,10 +193,37 @@ form > #option-input-area {
 }
 
 #preview-area {
-  background-color: #232;
   width: 100%;
   height: 100vw;
-  display: none !important;
+  display: none;
+}
+
+#preview-pizza {
+  position: relative;
+  background-image: url("../images/blankpizza.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 50%;
+  width: 90vw;
+  height: 90vw;
+  overflow: hidden;
+}
+
+.topping {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  left: 0;
+  top: 20%;
+  background-size: cover;
+  transform-origin: center;
+  z-index: 12;
+}
+
+#invoice-container {
+  display: flex;
+  flex-direction: column;
 }
 
 #invoice-area {
@@ -205,14 +232,12 @@ form > #option-input-area {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  /* padding: 1rem 2rem; */
 }
 
 .invoice {
   background-color: rgb(4, 5, 4);
   color: #aaa;
-  margin: 1rem 2rem;
-
+  margin: 1rem;
 }
 
 .invoice-header {
@@ -250,6 +275,11 @@ form > #option-input-area {
   background-color: rgb(27, 78, 24);
   width: 100%;
   padding: 1rem;
+  display: none;
+}
+
+main.ordering #grand-total-row {
+  display: flex;
 }
 
 #total-price-display {
@@ -273,7 +303,7 @@ main.ordering > #total-price-display {
   transform: unset;
 }
 
-main.ordering > #preview-area {
+main.ordering #preview-area {
   display: flex;
 }
 
@@ -299,7 +329,38 @@ footer {
     flex-direction: column;
     align-items: stretch;
     gap: 2rem;
-    width: 100%;
     min-width: 18rem;
+    flex-grow: 1;
+  }
+
+  #pizza-controls {
+    margin: 0;
+  }
+
+  #output-area {
+    flex-grow: 1;
+    height: 100%;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #preview-area {
+    display: block;
+    height: unset;
+  }
+  
+  #preview-pizza {
+    max-width: 30rem;
+    max-height: 30rem;
+    outline: solid green;
+  }
+
+  #invoice-container {
+   
+  }
+
+  #invoice-area {
+    
   }
 }

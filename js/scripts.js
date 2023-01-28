@@ -30,6 +30,7 @@ function Pizza(options={}) {
         garlic: { displayName: 'Garlic', },
         onions: { displayName: 'Onions', },
         jalapenos: { displayName: 'Jalapenos', },
+        tomato: { displayName: 'Tomato', },
       }, 
       premium: {
         pineapple: { displayName: 'Pineapple', },
@@ -162,10 +163,12 @@ Pizza.prototype.createOptionHandlers = function() {
           this.size = e.target.value;
         } else {
           this.toppings.push(e.target.value);
+          this.renderTopping(e.target.value);
         }
       } else {
         if (this.toppings.indexOf(e.target.value) !== -1) {
           this.toppings.splice(this.toppings.indexOf(e.target.value), 1);
+          this.renderTopping(e.target.value, true);
         }
       }
       document.querySelector('#total-price-display > span').innerText = this.getPriceTotal().toFixed(2);
@@ -206,3 +209,27 @@ Pizza.prototype.printInvoice = function() {
   document.getElementById('invoice-area').innerHTML = invoiceHTML;
   document.getElementById('grand-total-display').innerHTML = '$' + this.getPriceTotal().toFixed(2);
 }
+
+Pizza.prototype.renderTopping = function(topping, remove) {
+  let pizzaElement = document.getElementById('preview-pizza');
+  if (!remove) {
+    let imagePath = `../images/toppings/${topping.toLowerCase()}.png`;
+    for (let i=0; i < 30; i++) {
+      let randomX = randomInt(0, pizzaElement.offsetWidth);
+      let randomY = randomInt(0, pizzaElement.offsetHeight);
+      let toppingElement = document.createElement('div');
+      toppingElement.classList.add('topping', topping);
+      toppingElement.style.backgroundImage = `url("${imagePath}")`;
+      toppingElement.style.transform = `rotate(${randomInt(0, 360)}deg)`;
+      toppingElement.style.top = randomX + 'px';
+      toppingElement.style.left = randomY + 'px';
+      pizzaElement.append(toppingElement);
+    }
+  } else {
+    [...document.getElementsByClassName(topping)].forEach((toppingElement) => {
+      toppingElement.parentElement.removeChild(toppingElement);
+    });
+  }
+}
+
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
