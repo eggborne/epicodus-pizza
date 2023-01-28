@@ -17,9 +17,10 @@ function Pizza(options={}) {
   this.specialInstructions = options.specialInstructions || [];
   this.optionData = {
     sizes: {
-      small: { displayName: 'Small' },
-      medium: { displayName: 'Medium' }, 
-      large: { displayName: 'Large' },
+      small: { toppingAmount: 14, toppingSize: '21%', displayName: 'Small' },
+      medium: { toppingAmount: 18, toppingSize: '18%', displayName: 'Medium' }, 
+      large: { toppingAmount: 22, toppingSize: '15%', displayName: 'Large' },
+      xlarge: { toppingAmount: 36, toppingSize: '12%', displayName: 'XL' },
     },
     toppings: {
       standard: {
@@ -46,11 +47,11 @@ function Pizza(options={}) {
   },
 
   this.priceData = {
-    sizes: { small: 7.95, medium: 9.95, large: 12.95, },
+    sizes: { small: 7.95, medium: 9.95, large: 12.95, xlarge: 15.95, },
     crusts: { handTossed: null, thin: 1, deepDish: 2, },
     toppings: { 
-      standard: { small: 0.95, medium: 1.95, large: 2.50, },
-      premium: { small: 1.95, medium: 2.95, large: 3.50, }
+      standard: { small: 0.95, medium: 1.95, large: 2.50, xlarge: 4.00, },
+      premium: { small: 1.95, medium: 2.95, large: 3.50, xlarge: 5.00, }
     }
   };
 }
@@ -97,7 +98,7 @@ Pizza.prototype.createOptionInputs = function() {
       switch (optionType) {
         case 'sizes':
           sizeRadioArea.innerHTML += `
-            <div>
+            <div class="size-radio-row">
               <label for="${itemKey}">${item.displayName}</label>
               <div class="inline-price">$${this.priceData.sizes[itemKey]}</div>
               <input type="radio" id="${itemKey}" name="size" value="${itemKey}" ${itemKey === 'large' && 'checked'}>
@@ -113,12 +114,14 @@ Pizza.prototype.createOptionInputs = function() {
                 <h4>${itemKey[0].toUpperCase() + itemKey.slice(1)} toppings</h4>
                 <div class="header-price-display">
                   <div class="size-price-grid">
-                    <div>${this.optionData.sizes.small.displayName}</div>
-                    <div>${this.optionData.sizes.medium.displayName}</div>
-                    <div>${this.optionData.sizes.large.displayName}</div>
+                    <div>${this.optionData.sizes.small.displayName[0]}</div>
+                    <div>${this.optionData.sizes.medium.displayName[0]}</div>
+                    <div>${this.optionData.sizes.large.displayName[0]}</div>
+                    <div>XL</div>
                     <div>$${this.priceData.toppings[itemKey].small.toFixed(2)}</div>
                     <div>$${this.priceData.toppings[itemKey].medium.toFixed(2)}</div>
                     <div>$${this.priceData.toppings[itemKey].large.toFixed(2)}</div>
+                    <div>$${this.priceData.toppings[itemKey].xlarge.toFixed(2)}</div>
                   <div>
                 </div>
               </div>
@@ -161,6 +164,7 @@ Pizza.prototype.createOptionHandlers = function() {
       if (e.target.checked) {
         if (optionInput.type === 'radio') {
           this.size = e.target.value;
+          this.resizeToppings();
         } else {
           this.toppings.push(e.target.value);
           this.renderTopping(e.target.value);
@@ -211,19 +215,35 @@ Pizza.prototype.printInvoice = function() {
 }
 
 Pizza.prototype.renderTopping = function(topping, remove) {
-  let pizzaElement = document.getElementById('preview-pizza');
+  let pizzaElement = document.getElementById('preview-area');
+  let pizzaImg = document.getElementById('preview-pizza');
+  let maxRadius = pizzaImg.offsetWidth * 0.38;
+  let quantity = this.optionData.sizes[this.size].toppingAmount;
   if (!remove) {
-    let imagePath = `../images/toppings/${topping.toLowerCase()}.png`;
-    for (let i=0; i < 30; i++) {
-      let randomX = randomInt(0, pizzaElement.offsetWidth);
-      let randomY = randomInt(0, pizzaElement.offsetHeight);
+    let imagePath = `images/toppings/${topping.toLowerCase()}.png`;
+    let pizzaCenter = {
+      x: pizzaElement.clientLeft + (pizzaElement.clientWidth / 2),
+      y: pizzaElement.clientTop + (pizzaElement.clientHeight / 2),
+    }
+    let currentAngle = 0;
+    for (let i=0; i < quantity; i++) {
+      let randomPosition = randomPointInCircle(
+        pizzaCenter.x, 
+        pizzaCenter.y, 
+        maxRadius,
+        currentAngle,
+      );
       let toppingElement = document.createElement('div');
       toppingElement.classList.add('topping', topping);
       toppingElement.style.backgroundImage = `url("${imagePath}")`;
-      toppingElement.style.transform = `rotate(${randomInt(0, 360)}deg)`;
-      toppingElement.style.top = randomX + 'px';
-      toppingElement.style.left = randomY + 'px';
       pizzaElement.append(toppingElement);
+      let toppingSize = toppingElement.offsetWidth;
+      let randomX =  randomPosition.x - (toppingSize / 2);
+      let randomY =  randomPosition.y - (toppingSize / 2);
+      toppingElement.style.top = randomY + 'px';
+      toppingElement.style.left = randomX + 'px';
+      toppingElement.style.transform = `rotate(${randomInt(0, 360)}deg)`;
+      currentAngle += Math.round(360 / quantity);
     }
   } else {
     [...document.getElementsByClassName(topping)].forEach((toppingElement) => {
@@ -232,4 +252,30 @@ Pizza.prototype.renderTopping = function(topping, remove) {
   }
 }
 
+Pizza.prototype.resizeToppings = function() {
+  let newToppingSize = this.optionData.sizes[this.size].toppingSize;
+  document.documentElement.style.setProperty('--topping-size', newToppingSize);
+  for (const topping in this.toppings) {
+    this.renderTopping(this.toppings[topping], true);
+    this.renderTopping(this.toppings[topping]);
+  };
+}
+
+Pizza.prototype.clearToppings = function() {
+  for (const topping in this.toppings) {
+    this.renderTopping(this.toppings[topping], true);
+    document.getElementById(`${this.toppings[topping]}-checkbox`).checked = false;
+  };
+}
+
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+
+const randomPointInCircle = (centerX, centerY, radius, angle, exactRadius) => {
+  angle = degreesToRadians(angle) || Math.random() * 2 * Math.PI,
+  hypotenuse = exactRadius ? Math.sqrt(1) * radius : Math.sqrt(Math.random()) * radius,
+  adjacent = Math.cos(angle) * hypotenuse,
+  opposite = Math.sin(angle) * hypotenuse
+  return { x: centerX + adjacent, y: centerY + opposite };
+}
+
+const degreesToRadians = degrees => degrees * (Math.PI/180);

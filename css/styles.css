@@ -2,6 +2,7 @@
   --header-height: 3.5rem;
   --header-color: #422;
   --bg-color: #211;
+  --topping-size: 14%;
 }
 
 * {
@@ -20,6 +21,10 @@ body {
 
 a {
   color: rgb(168, 120, 120);
+}
+
+button, input, select, label {
+  cursor: pointer;
 }
 
 button {
@@ -93,15 +98,13 @@ main.ordering > #start-order-button {
 #topping-checkbox-area {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  margin: 0 0.5rem;
 }
 
 .checkbox-section {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 1rem;
+  /* gap: 1rem; */
 }
 
 .input-header {
@@ -123,9 +126,9 @@ main.ordering > #start-order-button {
 }
 
 .size-price-grid {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   justify-content: center;
   align-items: center;
@@ -142,6 +145,16 @@ main.ordering > #start-order-button {
   gap: 1rem;
 }
 
+.size-radio-row, .checkbox-row {
+  padding: 0.5rem;
+
+}
+
+.checkbox-row:nth-child(even),
+.size-radio-row:nth-child(even) {
+  background-color: #00000011;
+}
+
 .checkbox-row:last-child {
   margin-bottom: 1rem;
 }
@@ -156,7 +169,7 @@ main.ordering > #start-order-button {
   height: 2rem;
 }
 
-#size-radio-area label {
+#size-radio-area label, .checkbox-row > label {
   flex-grow: 1;
 }
 
@@ -193,13 +206,14 @@ form > #option-input-area {
 }
 
 #preview-area {
+  position: relative;
   width: 100%;
   height: 100vw;
   display: none;
+  overflow: hidden;
 }
 
 #preview-pizza {
-  position: relative;
   background-image: url("../images/blankpizza.png");
   background-size: contain;
   background-position: center;
@@ -212,26 +226,29 @@ form > #option-input-area {
 
 .topping {
   position: absolute;
-  width: 20%;
-  height: 20%;
+  width: var(--topping-size);
+  height: var(--topping-size);
   left: 0;
-  top: 20%;
-  background-size: cover;
+  top: 0;
+  background-repeat: no-repeat;
+  background-size: contain;
   transform-origin: center;
-  z-index: 12;
+  background-position: center;
 }
 
 #invoice-container {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  width: 100%;
 }
 
 #invoice-area {
-  background-color: #232;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  align-self: center;
 }
 
 .invoice {
@@ -257,8 +274,9 @@ form > #option-input-area {
 }
 
 .invoice-list {
-  width: 60%;
-  margin: 0 2.5rem 0.5rem 2.5rem;
+  max-width: 12rem;
+  margin: 0 2.5rem 0.5rem 2rem;
+  /* display: none; */
 }
 
 .invoice-row > .invoice-row-price:not(.total) {
@@ -267,7 +285,7 @@ form > #option-input-area {
 
 .invoice-row.sublist {
   font-weight: normal;
-  padding-left: 1.5rem;
+  /* padding-left: 1.5rem; */
 }
 
 #grand-total-row {
@@ -297,6 +315,7 @@ main.ordering #grand-total-row {
   border-radius: 0 0 0.5rem 0.5rem;
   transform: translateX(100%);
   transition: transform 400ms ease;
+  z-index: 1;
 }
 
 main.ordering > #total-price-display {
@@ -340,27 +359,51 @@ footer {
   #output-area {
     flex-grow: 1;
     height: 100%;
+    background: orange;
     align-self: flex-start;
+    opacity: 0;
+    transition: opacity 600ms ease;
+    pointer-events: none;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  main.ordering #output-area {
+    opacity: 1;
   }
 
   #preview-area {
     display: block;
     height: unset;
+    scale: 0;
+    transition: scale 400ms ease;
+  }
+
+  main.ordering #preview-area {
+    scale: 1;
   }
   
   #preview-pizza {
-    max-width: 30rem;
-    max-height: 30rem;
-    outline: solid green;
+    position: relative;
+    width: 80%;
+    max-width: 36rem;
+    max-height: 36rem;
+    margin: 3rem;
   }
 
-  #invoice-container {
-   
+  .invoice-list {
+    max-width: 85%;
+    margin: 0 2.5rem 0.5rem 2rem;
+    /* display: none; */
   }
 
-  #invoice-area {
-    
+  #start-order-button {
+    position: absolute;
+    width: 16rem;
+    height: 6rem;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }
