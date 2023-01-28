@@ -5,6 +5,7 @@ window.addEventListener('load', function() {
     e.preventDefault();
     pizza = new Pizza();
     pizza.createOptionInputs();
+    pizza.createOptionHandlers();
     document.querySelector('main').classList.add('ordering');
   });
 });
@@ -14,6 +15,7 @@ function Pizza(options={}) {
   this.crust = options.crust || 'handTossed';
   this.toppings = options.toppings || [];
   this.specialInstructions = options.specialInstructions || [];
+  this.currentPrice = 0;
 
   this.optionData = {
     sizes: {
@@ -52,7 +54,6 @@ function Pizza(options={}) {
         displayName: 'Onions',
         type: 'standard',
       },
-      
       jalapenos: {
         displayName: 'Jalapenos',
         type: 'standard',
@@ -145,7 +146,7 @@ Pizza.prototype.createOptionInputs = function() {
           toppingCheckboxArea.innerHTML += `
             <div>
               <label for="${itemKey}">${item.displayName}</label>
-              <input type="checkbox" name="${itemKey}" value="${item.displayName}">
+              <input type="checkbox" name="${itemKey}" value="${itemKey}">
             </div>
           `;          
           break;
@@ -161,4 +162,28 @@ Pizza.prototype.createOptionInputs = function() {
   document.getElementById('option-input-area').append(sizeRadioArea);
   document.getElementById('option-input-area').append(crustSelectArea);
   document.getElementById('option-input-area').append(toppingCheckboxArea);
+}
+
+Pizza.prototype.createOptionHandlers = function() {
+  document.getElementById('crust-select').addEventListener('change', (e) => {
+    this.crust = e.target.value;
+    document.querySelector('#invoice-area > span').innerText = this.getPriceTotal();
+  });
+  let optionInputs = document.getElementsByTagName('input');
+  for (const optionInput of optionInputs) {
+    optionInput.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        if (optionInput.type === 'radio') {
+          this.size = e.target.value;
+        } else {
+          this.toppings.push(e.target.value);
+        }
+      } else {
+        if (this.toppings.indexOf(e.target.value) !== -1) {
+          this.toppings.splice(this.toppings.indexOf(e.target.value), 1);
+        }
+      }
+      document.querySelector('#invoice-area > span').innerText = this.getPriceTotal().toFixed(2);
+    });
+  }
 }
