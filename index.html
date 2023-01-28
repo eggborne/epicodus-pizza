@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#c6b8b8">
-  <link rel="stylesheet" href="css/styles.css" type="text/css">
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/styles.css" type="text/css" />
   <script src="js/scripts.js"></script>
   <title>Epicodus Pizza Parlor</title>
 </head>
+
 <body>
-  <header>
-
-  </header>
+  <header class="center-flex"><h1>Epicodus Pizza Parlor</h1></header>
   <main>
-
+    <button type="submit" id="start-order-button">Start Order</button>
+    <div id="pizza-controls">
+      <form>
+        <div id="option-input-area"></div>
+        <!-- <button type="submit" id="submit-pizza-button">Submit</button> -->
+      </form>
+    </div>
+    <div id="invoice-area" class="center-flex">Total:&nbsp;$<span id="total-price">12.95</span></div>
+    <div id="preview-area"></div>
   </main>
-  <footer>
-    <p>made for <a href="https://epicodus.com">Epicodus</a> by <a href="mailto:mike@mikedonovan.dev">mike@mikedonovan.dev</a></p>
+  <footer class="center-flex">
+    <p>
+      made for <a href="https://epicodus.com">Epicodus</a> by
+      <a href="mailto:mike@mikedonovan.dev"> mike@mikedonovan.dev</a>
+    </p>
   </footer>
 </body>
 </html>

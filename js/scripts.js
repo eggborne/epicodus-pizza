@@ -1,3 +1,14 @@
+let pizza;
+
+window.addEventListener('load', function() {
+  document.getElementById('start-order-button').addEventListener('click', function(e) {
+    e.preventDefault();
+    pizza = new Pizza();
+    pizza.createOptionInputs();
+    document.querySelector('main').classList.add('ordering');
+  });
+});
+
 function Pizza(options={}) {
   this.size = options.size || 'large';
   this.crust = options.crust || 'handTossed';
@@ -5,6 +16,17 @@ function Pizza(options={}) {
   this.specialInstructions = options.specialInstructions || [];
 
   this.optionData = {
+    sizes: {
+      small: {
+        displayName: 'Small'
+      },
+      medium: {
+        displayName: 'Medium'
+      },
+      large: {
+        displayName: 'Large'
+      },
+    },
     toppings: {
       greenPeppers: {
         displayName: 'Green Peppers',
@@ -30,6 +52,7 @@ function Pizza(options={}) {
         displayName: 'Onions',
         type: 'standard',
       },
+      
       jalapenos: {
         displayName: 'Jalapenos',
         type: 'standard',
@@ -95,4 +118,47 @@ Pizza.prototype.getPriceTotal = function() {
     toppingsCost += this.priceData.toppings[toppingType][this.size];
   });
   return baseSizeCost + baseCrustCost + toppingsCost;
-} 
+}
+
+Pizza.prototype.createOptionInputs = function() {
+  let sizeRadioArea = document.createElement('div');
+  let toppingCheckboxArea = document.createElement('div');
+  let crustSelectArea = document.createElement('select');
+  sizeRadioArea.id = 'size-radio-area';
+  toppingCheckboxArea.id = 'topping-checkbox-area';
+  crustSelectArea.id = 'crust-select';
+
+  
+  for (let optionType in this.optionData) {
+    for (let itemKey in this.optionData[optionType]) {
+      let item = this.optionData[optionType][itemKey];
+      switch (optionType) {
+        case 'sizes':
+          sizeRadioArea.innerHTML += `
+            <div>
+              <label for="${itemKey}">${item.displayName}</label>
+              <input type="radio" id="${itemKey}" name="size" value="${itemKey}" ${itemKey === 'large' && 'checked'}>
+            </div>
+          `;          
+          break;
+        case 'toppings':
+          toppingCheckboxArea.innerHTML += `
+            <div>
+              <label for="${itemKey}">${item.displayName}</label>
+              <input type="checkbox" name="${itemKey}" value="${item.displayName}">
+            </div>
+          `;          
+          break;
+
+        case 'crusts':
+          crustSelectArea.innerHTML += `
+            <option value="${itemKey}">${item.displayName}</option>
+          `;
+          break;
+      }
+    }
+  }
+  document.getElementById('option-input-area').append(sizeRadioArea);
+  document.getElementById('option-input-area').append(crustSelectArea);
+  document.getElementById('option-input-area').append(toppingCheckboxArea);
+}
