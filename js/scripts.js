@@ -17,10 +17,10 @@ function Pizza(options={}) {
   this.specialInstructions = options.specialInstructions || [];
   this.optionData = {
     sizes: {
-      small: { toppingAmount: 14, toppingSize: '21%', displayName: 'Small' },
-      medium: { toppingAmount: 18, toppingSize: '18%', displayName: 'Medium' }, 
-      large: { toppingAmount: 22, toppingSize: '15%', displayName: 'Large' },
-      xlarge: { toppingAmount: 36, toppingSize: '12%', displayName: 'XL' },
+      small: { toppingAmount: 16, toppingSize: '21%', displayName: 'Small' },
+      medium: { toppingAmount: 20, toppingSize: '18%', displayName: 'Medium' }, 
+      large: { toppingAmount: 26, toppingSize: '15%', displayName: 'Large' },
+      xlarge: { toppingAmount: 40, toppingSize: '12%', displayName: 'XL' },
     },
     toppings: {
       standard: {
@@ -30,7 +30,7 @@ function Pizza(options={}) {
         spinach: { displayName: 'Spinach', },
         garlic: { displayName: 'Garlic', },
         onions: { displayName: 'Onions', },
-        jalapenos: { displayName: 'Jalapenos', },
+        jalapenos: { displayName: 'Jalapeños', },
         tomato: { displayName: 'Tomato', },
       }, 
       premium: {
@@ -51,17 +51,20 @@ function Pizza(options={}) {
     crusts: { handTossed: null, thin: 1, deepDish: 2, },
     toppings: { 
       standard: { small: 0.95, medium: 1.95, large: 2.50, xlarge: 4.00, },
-      premium: { small: 1.95, medium: 2.95, large: 3.50, xlarge: 5.00, }
+      premium: { small: 1.95, medium: 2.95, large: 3.50, xlarge: 5.00, },
     }
   };
 }
+
+
+// Business logic
 
 Pizza.prototype.getPriceTotal = function() {
   let baseSizeCost = this.priceData.sizes[this.size];
   let baseCrustCost = this.priceData.crusts[this.crust];
   let toppingsCost = this.getTotalToppingPrice();
   return baseSizeCost + baseCrustCost + toppingsCost;
-}
+};
 
 Pizza.prototype.getTotalToppingPrice = function() {
   let toppingsCost = 0;
@@ -70,11 +73,14 @@ Pizza.prototype.getTotalToppingPrice = function() {
     toppingsCost += this.priceData.toppings[toppingType][this.size];
   });
   return toppingsCost;
-}
+};
 
 Pizza.prototype.getToppingType = function(topping) {
   return topping in this.optionData.toppings.standard ? 'standard' : 'premium';
-}
+};
+
+
+// UI logic
 
 Pizza.prototype.createOptionInputs = function() {
   let sizeRadioArea = document.createElement('div');
@@ -150,7 +156,7 @@ Pizza.prototype.createOptionInputs = function() {
     }
   }
   document.getElementById('option-input-area').append(sizeRadioArea, crustSelectArea, toppingCheckboxArea);
-}
+};
 
 Pizza.prototype.createOptionHandlers = function() {
   document.getElementById('crust-select').addEventListener('change', (e) => {
@@ -179,10 +185,10 @@ Pizza.prototype.createOptionHandlers = function() {
       this.printInvoice();
     });
   }
-}
+};
 
 Pizza.prototype.printInvoice = function() {
-  let size = this.optionData.sizes[this.size].displayName;
+  let displaySize = this.optionData.sizes[this.size].displayName;
   let crustStyle = this.optionData.crusts[this.crust].displayName;
   let pizzaBasePrice = this.priceData.sizes[this.size] + this.priceData.crusts[this.crust];
   let displayToppings = [];
@@ -190,11 +196,10 @@ Pizza.prototype.printInvoice = function() {
     let toppingType = this.getToppingType(topping);
     displayToppings.push(this.optionData.toppings[toppingType][topping].displayName);
   });
-
   let invoiceHTML = `
   <div class="invoice">
     <div class="invoice-header invoice-row">
-      <h4>${size} ${crustStyle} Pizza</h4>
+      <h4>${displaySize} ${crustStyle} Pizza</h4>
       <p class="invoice-row-price">$${pizzaBasePrice.toFixed(2)}</p>
     </div>
     <div ${this.toppings.length === 0 ? 'style="display: none" ' : null} class="invoice-title invoice-row sublist">
@@ -212,7 +217,7 @@ Pizza.prototype.printInvoice = function() {
   `;
   document.getElementById('invoice-area').innerHTML = invoiceHTML;
   document.getElementById('grand-total-display').innerHTML = '$' + this.getPriceTotal().toFixed(2);
-}
+};
 
 Pizza.prototype.renderTopping = function(topping, remove) {
   let pizzaElement = document.getElementById('preview-area');
@@ -224,14 +229,14 @@ Pizza.prototype.renderTopping = function(topping, remove) {
     let pizzaCenter = {
       x: pizzaElement.clientLeft + (pizzaElement.clientWidth / 2),
       y: pizzaElement.clientTop + (pizzaElement.clientHeight / 2),
-    }
+    };
     let currentAngle = 0;
     for (let i=0; i < quantity; i++) {
       let randomPosition = randomPointInCircle(
         pizzaCenter.x, 
         pizzaCenter.y, 
         maxRadius,
-        currentAngle,
+        currentAngle
       );
       let toppingElement = document.createElement('div');
       toppingElement.classList.add('topping', topping);
@@ -250,7 +255,7 @@ Pizza.prototype.renderTopping = function(topping, remove) {
       toppingElement.parentElement.removeChild(toppingElement);
     });
   }
-}
+};
 
 Pizza.prototype.resizeToppings = function() {
   let newToppingSize = this.optionData.sizes[this.size].toppingSize;
@@ -259,16 +264,21 @@ Pizza.prototype.resizeToppings = function() {
     this.renderTopping(this.toppings[topping], true);
     this.renderTopping(this.toppings[topping]);
   };
-}
+};
 
 Pizza.prototype.clearToppings = function() {
   for (const topping in this.toppings) {
     this.renderTopping(this.toppings[topping], true);
     document.getElementById(`${this.toppings[topping]}-checkbox`).checked = false;
   };
-}
+};
+
+
+// Utillity functions
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+
+const degreesToRadians = degrees => degrees * (Math.PI/180);
 
 const randomPointInCircle = (centerX, centerY, radius, angle, exactRadius) => {
   angle = degreesToRadians(angle) || Math.random() * 2 * Math.PI,
@@ -276,6 +286,4 @@ const randomPointInCircle = (centerX, centerY, radius, angle, exactRadius) => {
   adjacent = Math.cos(angle) * hypotenuse,
   opposite = Math.sin(angle) * hypotenuse
   return { x: centerX + adjacent, y: centerY + opposite };
-}
-
-const degreesToRadians = degrees => degrees * (Math.PI/180);
+};

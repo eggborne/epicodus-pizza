@@ -1,6 +1,6 @@
 :root {
   --header-height: 3.5rem;
-  --header-color: #422;
+  --header-color: #442222;
   --bg-color: #211;
   --topping-size: 14%;
 }
@@ -81,7 +81,7 @@ main.ordering > #start-order-button {
 }
 
 #pizza-controls {
-  background-color: gray;
+  background-color: var(--header-color);
   display: none;
   font-size: 1.5rem;
   padding: 2rem;
@@ -104,7 +104,6 @@ main.ordering > #start-order-button {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  /* gap: 1rem; */
 }
 
 .input-header {
@@ -134,7 +133,12 @@ main.ordering > #start-order-button {
   align-items: center;
   justify-items: center;
   gap: 0.25rem;
-  color: rgb(215, 226, 215);
+  color: rgb(193, 245, 193);
+}
+
+.inline-price {
+  font-size: 1.2rem;
+  color: rgb(193, 245, 193);
 }
 
 #size-radio-area > div,
@@ -147,7 +151,6 @@ main.ordering > #start-order-button {
 
 .size-radio-row, .checkbox-row {
   padding: 0.5rem;
-
 }
 
 .checkbox-row:nth-child(even),
@@ -178,16 +181,6 @@ main.ordering > #start-order-button {
   width: 100%;
   height: 4rem;
   padding-left: 0.5rem
-}
-
-.inline-price {
-  font-size: 1.2rem;
-  color: rgb(215, 226, 215);
-}
-
-select {
-  display: flex;
-  justify-content: space-between;
 }
 
 form {
@@ -221,7 +214,6 @@ form > #option-input-area {
   border-radius: 50%;
   width: 90vw;
   height: 90vw;
-  overflow: hidden;
 }
 
 .topping {
@@ -276,16 +268,10 @@ form > #option-input-area {
 .invoice-list {
   max-width: 12rem;
   margin: 0 2.5rem 0.5rem 2rem;
-  /* display: none; */
 }
 
 .invoice-row > .invoice-row-price:not(.total) {
   font-weight: normal;
-}
-
-.invoice-row.sublist {
-  font-weight: normal;
-  /* padding-left: 1.5rem; */
 }
 
 #grand-total-row {
@@ -294,10 +280,6 @@ form > #option-input-area {
   width: 100%;
   padding: 1rem;
   display: none;
-}
-
-main.ordering #grand-total-row {
-  display: flex;
 }
 
 #total-price-display {
@@ -322,11 +304,9 @@ main.ordering > #total-price-display {
   transform: unset;
 }
 
-main.ordering #preview-area {
-  display: flex;
-}
-
-main.ordering > #pizza-controls {
+main.ordering #preview-area, 
+main.ordering > #pizza-controls, 
+main.ordering #grand-total-row {
   display: flex;
 }
 
@@ -359,7 +339,6 @@ footer {
   #output-area {
     flex-grow: 1;
     height: 100%;
-    background: orange;
     align-self: flex-start;
     opacity: 0;
     transition: opacity 600ms ease;
@@ -395,7 +374,6 @@ footer {
   .invoice-list {
     max-width: 85%;
     margin: 0 2.5rem 0.5rem 2rem;
-    /* display: none; */
   }
 
   #start-order-button {
