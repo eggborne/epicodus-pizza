@@ -17,6 +17,7 @@ body {
   flex-direction: column;
   align-items: stretch;
   color: #ccc;
+  user-select: none;
 }
 
 a {
@@ -223,7 +224,7 @@ form > #option-input-area {
   left: 0;
   top: 0;
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
   transform-origin: center;
   background-position: center;
 }

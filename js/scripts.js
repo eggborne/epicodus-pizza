@@ -17,7 +17,7 @@ function PizzaParlor() {
           small: { toppingAmount: 16, toppingSize: '21%', displayName: 'Small' },
           medium: { toppingAmount: 20, toppingSize: '18%', displayName: 'Medium' }, 
           large: { toppingAmount: 26, toppingSize: '15%', displayName: 'Large' },
-          xlarge: { toppingAmount: 40, toppingSize: '12%', displayName: 'XL' },
+          xlarge: { toppingAmount: 36, toppingSize: '12%', displayName: 'XL' },
         },
         toppings: {
           standard: {
@@ -271,15 +271,16 @@ Pizza.prototype.printInvoice = function() {
 Pizza.prototype.renderTopping = function(topping, remove) {
   let pizzaElement = document.getElementById('preview-area');
   let pizzaImg = document.getElementById(`preview-pizza-${this.id}`);
-  let quantity = this.optionData.sizes[this.size].toppingAmount;
+  let quantity = this.optionData.sizes[this.size].toppingAmount - (this.toppings.length);
   if (!remove) {
     let imagePath = `images/toppings/${topping.toLowerCase()}.png`;
     let pizzaCenter = {
       x: pizzaElement.clientLeft + (pizzaElement.clientWidth / 2),
       y: pizzaElement.clientTop + (pizzaElement.clientHeight / 2),
     };
-    let currentAngle = 0;
+    let currentAngle = 1;
     for (let i=0; i < quantity; i++) {
+      console.log(currentAngle);
       let toppingElement = document.createElement('div');
       toppingElement.classList.add('topping', topping);
       toppingElement.style.backgroundImage = `url("${imagePath}")`;
@@ -297,7 +298,8 @@ Pizza.prototype.renderTopping = function(topping, remove) {
       toppingElement.style.top = randomY + 'px';
       toppingElement.style.left = randomX + 'px';
       toppingElement.style.transform = `rotate(${randomInt(0, 359)}deg)`;
-      currentAngle += Math.round(360 / quantity);
+      currentAngle += 360 / quantity;
+
     }
   } else {
     [...document.getElementsByClassName(topping)].forEach((toppingElement) => {
@@ -321,7 +323,6 @@ Pizza.prototype.clearToppings = function() {
     document.getElementById(`${this.toppings[topping]}-checkbox`).checked = false;
   };
 };
-
 
 // Utillity functions
 
