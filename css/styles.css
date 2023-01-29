@@ -206,7 +206,7 @@ form > #option-input-area {
   overflow: hidden;
 }
 
-#preview-pizza {
+.preview-pizza {
   background-image: url("../images/blankpizza.png");
   background-size: contain;
   background-position: center;
@@ -363,7 +363,7 @@ footer {
     scale: 1;
   }
   
-  #preview-pizza {
+  .preview-pizza {
     position: relative;
     width: 80%;
     max-width: 36rem;

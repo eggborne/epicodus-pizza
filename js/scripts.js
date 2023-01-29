@@ -1,63 +1,88 @@
 window.addEventListener('load', function() {
   document.getElementById('start-order-button').addEventListener('click', function(e) {
     e.preventDefault();
-    let pizza = new Pizza();
-    pizza.createOptionInputs();
-    pizza.createOptionHandlers();
-    pizza.printInvoice();
+    let parlor = new PizzaParlor();
+    parlor.produceDefaultPizza();
     document.querySelector('header').classList.add('ordering');
     document.querySelector('main').classList.add('ordering');
   });
 });
+
+function PizzaParlor() {
+  this.pizzas = {};
+  this.pizzaTypes = {
+    classic: {
+      optionData:  {
+        sizes: {
+          small: { toppingAmount: 16, toppingSize: '21%', displayName: 'Small' },
+          medium: { toppingAmount: 20, toppingSize: '18%', displayName: 'Medium' }, 
+          large: { toppingAmount: 26, toppingSize: '15%', displayName: 'Large' },
+          xlarge: { toppingAmount: 40, toppingSize: '12%', displayName: 'XL' },
+        },
+        toppings: {
+          standard: {
+            greenPeppers: { displayName: 'Green Peppers', },
+            redPeppers: { displayName: 'Red Peppers', },
+            blackOlives: { displayName: 'Black Olives', },
+            spinach: { displayName: 'Spinach', },
+            garlic: { displayName: 'Garlic', },
+            onions: { displayName: 'Onions', },
+            jalapenos: { displayName: 'Jalapeños', },
+            tomato: { displayName: 'Tomato', },
+          }, 
+          premium: {
+            pineapple: { displayName: 'Pineapple', },
+            falafel: { displayName: 'Falafel', },
+            skittles: { displayName: 'Skittles®', },
+          }
+        },
+        crusts: {
+          handTossed: { displayName: 'Hand-Tossed', },
+          thin: { displayName: 'Thin Crust', },
+          deepDish: { displayName: 'Deep Dish', },
+        },
+      },
+      priceData: {
+        sizes: { small: 7.95, medium: 9.95, large: 12.95, xlarge: 15.95, },
+        crusts: { handTossed: null, thin: 1, deepDish: 2, },
+        toppings: { 
+          standard: { small: 0.95, medium: 1.95, large: 2.50, xlarge: 4.00, },
+          premium: { small: 1.95, medium: 2.95, large: 3.50, xlarge: 5.00, },
+        }
+      }
+    }
+  }
+  this.currentId = 0;
+}
 
 function Pizza(options={}) {
   this.size = options.size || 'large';
   this.crust = options.crust || 'handTossed';
   this.toppings = options.toppings || [];
   this.specialInstructions = options.specialInstructions || [];
-  this.optionData = {
-    sizes: {
-      small: { toppingAmount: 16, toppingSize: '21%', displayName: 'Small' },
-      medium: { toppingAmount: 20, toppingSize: '18%', displayName: 'Medium' }, 
-      large: { toppingAmount: 26, toppingSize: '15%', displayName: 'Large' },
-      xlarge: { toppingAmount: 40, toppingSize: '12%', displayName: 'XL' },
-    },
-    toppings: {
-      standard: {
-        greenPeppers: { displayName: 'Green Peppers', },
-        redPeppers: { displayName: 'Red Peppers', },
-        blackOlives: { displayName: 'Black Olives', },
-        spinach: { displayName: 'Spinach', },
-        garlic: { displayName: 'Garlic', },
-        onions: { displayName: 'Onions', },
-        jalapenos: { displayName: 'Jalapeños', },
-        tomato: { displayName: 'Tomato', },
-      }, 
-      premium: {
-        pineapple: { displayName: 'Pineapple', },
-        falafel: { displayName: 'Falafel', },
-        skittles: { displayName: 'Skittles®', },
-      }
-    },
-    crusts: {
-      handTossed: { displayName: 'Hand-Tossed', },
-      thin: { displayName: 'Thin Crust', },
-      deepDish: { displayName: 'Deep Dish', },
-    },
-  },
-
-  this.priceData = {
-    sizes: { small: 7.95, medium: 9.95, large: 12.95, xlarge: 15.95, },
-    crusts: { handTossed: null, thin: 1, deepDish: 2, },
-    toppings: { 
-      standard: { small: 0.95, medium: 1.95, large: 2.50, xlarge: 4.00, },
-      premium: { small: 1.95, medium: 2.95, large: 3.50, xlarge: 5.00, },
-    }
-  };
+  this.optionData = options.optionData;
+  this.priceData = options.priceData;
+  this.pizzaType = options.pizzaType;
+  this.id = options.id;
 }
 
-
 // Business logic
+
+PizzaParlor.prototype.getNewID = function() {
+  this.currentId++;
+  return this.currentId;
+}
+
+PizzaParlor.prototype.addPizza = function(pizzaType) {
+  let newId = this.getNewID();
+  let newPizza = new Pizza({
+    optionData: this.pizzaTypes[pizzaType].optionData, 
+    priceData: this.pizzaTypes[pizzaType].priceData,
+    id: newId,
+    pizzaType,
+  });
+  this.pizzas[newId] = newPizza;
+}
 
 Pizza.prototype.getPriceTotal = function() {
   let baseSizeCost = this.priceData.sizes[this.size];
@@ -79,8 +104,32 @@ Pizza.prototype.getToppingType = function(topping) {
   return topping in this.optionData.toppings.standard ? 'standard' : 'premium';
 };
 
-
 // UI logic
+
+PizzaParlor.prototype.produceDefaultPizza = function() {
+  this.addPizza('classic');
+  this.renderMenuForPizza(this.currentId);
+  this.renderPreviewForPizza(this.currentId);
+}
+
+PizzaParlor.prototype.renderMenuForPizza = function(pizzaId) {
+  this.pizzas[pizzaId].createOptionInputs();
+  this.pizzas[pizzaId].createOptionHandlers();
+};
+
+PizzaParlor.prototype.renderPreviewForPizza = function(pizzaId) {
+  let previewArea = document.getElementById(`preview-area`);
+  previewArea.innerHTML += `
+    <div class="preview-pizza" id="preview-pizza-${pizzaId}">
+      <span role="img" aria-label="A delicious pizza."></span>
+    </div>
+  `;
+};
+
+PizzaParlor.prototype.renderInvoiceForPizza = function(pizzaId) {
+  let pizza = this.pizzas[pizzaId];
+  pizza.printInvoice();
+};
 
 Pizza.prototype.createOptionInputs = function() {
   let sizeRadioArea = document.createElement('div');
@@ -221,8 +270,7 @@ Pizza.prototype.printInvoice = function() {
 
 Pizza.prototype.renderTopping = function(topping, remove) {
   let pizzaElement = document.getElementById('preview-area');
-  let pizzaImg = document.getElementById('preview-pizza');
-  // let maxRadius = pizzaImg.offsetWidth * 0.38;
+  let pizzaImg = document.getElementById(`preview-pizza-${this.id}`);
   let quantity = this.optionData.sizes[this.size].toppingAmount;
   if (!remove) {
     let imagePath = `images/toppings/${topping.toLowerCase()}.png`;
@@ -238,7 +286,6 @@ Pizza.prototype.renderTopping = function(topping, remove) {
       pizzaElement.append(toppingElement);
       let toppingSize = toppingElement.offsetWidth;
       let maxRadius = (pizzaImg.offsetWidth / 2) -(toppingSize * 0.6);
-
       let randomPosition = randomPointInCircle(
         pizzaCenter.x, 
         pizzaCenter.y, 
