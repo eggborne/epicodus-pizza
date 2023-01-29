@@ -222,7 +222,7 @@ Pizza.prototype.printInvoice = function() {
 Pizza.prototype.renderTopping = function(topping, remove) {
   let pizzaElement = document.getElementById('preview-area');
   let pizzaImg = document.getElementById('preview-pizza');
-  let maxRadius = pizzaImg.offsetWidth * 0.38;
+  // let maxRadius = pizzaImg.offsetWidth * 0.38;
   let quantity = this.optionData.sizes[this.size].toppingAmount;
   if (!remove) {
     let imagePath = `images/toppings/${topping.toLowerCase()}.png`;
@@ -232,22 +232,24 @@ Pizza.prototype.renderTopping = function(topping, remove) {
     };
     let currentAngle = 0;
     for (let i=0; i < quantity; i++) {
+      let toppingElement = document.createElement('div');
+      toppingElement.classList.add('topping', topping);
+      toppingElement.style.backgroundImage = `url("${imagePath}")`;
+      pizzaElement.append(toppingElement);
+      let toppingSize = toppingElement.offsetWidth;
+      let maxRadius = (pizzaImg.offsetWidth / 2) -(toppingSize * 0.6);
+
       let randomPosition = randomPointInCircle(
         pizzaCenter.x, 
         pizzaCenter.y, 
         maxRadius,
         currentAngle
       );
-      let toppingElement = document.createElement('div');
-      toppingElement.classList.add('topping', topping);
-      toppingElement.style.backgroundImage = `url("${imagePath}")`;
-      pizzaElement.append(toppingElement);
-      let toppingSize = toppingElement.offsetWidth;
       let randomX =  randomPosition.x - (toppingSize / 2);
       let randomY =  randomPosition.y - (toppingSize / 2);
       toppingElement.style.top = randomY + 'px';
       toppingElement.style.left = randomX + 'px';
-      toppingElement.style.transform = `rotate(${randomInt(0, 360)}deg)`;
+      toppingElement.style.transform = `rotate(${randomInt(0, 359)}deg)`;
       currentAngle += Math.round(360 / quantity);
     }
   } else {
