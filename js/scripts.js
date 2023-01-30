@@ -1,13 +1,3 @@
-let jsStarted = Date.now();
-
-const imagePaths = [
-  'images/smallblank.png',
-  'images/mediumblank.png',
-  'images/largeblank.png',
-  'images/xlblank.png',
-];
-
-
 window.addEventListener('load', async function() {
   document.getElementById('start-order-button').addEventListener('click', function(e) {
     e.preventDefault();
@@ -15,8 +5,6 @@ window.addEventListener('load', async function() {
     document.querySelector('header').classList.add('ordering');
     document.querySelector('main').classList.add('ordering');
   });
-  await preloadImages();
-  console.log('loaded', imagePaths.length, 'images in', (Date.now() - jsStarted));
 });
 
 function PizzaParlor() {
@@ -64,6 +52,7 @@ function PizzaParlor() {
     }
   }
   this.currentId = 0;
+  this.editingPizza;
 }
 
 function Pizza(options={}) {
@@ -139,6 +128,7 @@ PizzaParlor.prototype.renderInvoiceForPizza = function(pizzaId) {
 
 PizzaParlor.prototype.produceDefaultPizza = function() {
   this.addPizza('classic');
+  this.editingPizza = this.currentId;
   this.renderMenuForPizza(this.currentId);
   this.renderPreviewForPizza(this.currentId);
   this.pizzas[this.currentId].printInvoice();
@@ -320,6 +310,7 @@ Pizza.prototype.renderTopping = function(topping, remove) {
     }
   } else {
     [...document.getElementsByClassName(topping)].forEach(async (toppingElement) => {
+      toppingElement.style.zIndex = 1;
       toppingElement.style.opacity = 0;
       toppingElement.style.transform = `scale(1.5)`;
       await pause(200);
@@ -338,17 +329,8 @@ Pizza.prototype.resizeToppings = function() {
 };
 
 Pizza.prototype.changeBlank = function(oldSize, newSize) {
-  let newBGPath = `images/${this.size}blank.png`;
   document.querySelector(`#preview-area > #preview-pizza-${this.id}`).classList.replace(oldSize, newSize);
-} 
-
-
-Pizza.prototype.clearToppings = function() {
-  for (const topping in this.toppings) {
-    this.renderTopping(this.toppings[topping], true);
-    document.getElementById(`${this.toppings[topping]}-checkbox`).checked = false;
-  };
-};
+}
 
 // Utillity functions
 
@@ -369,19 +351,4 @@ const giveClassForDuration = (element, className, duration) => {
   setTimeout(() => {
     element.classList.remove(className);
   }, duration);
-}
-
-function preload(arr) {
-  let images = [];
-  for (let p = 0; p < arr.length; p++) {
-    let path = arr[p];
-    images[p] = new Image();
-    images[p].src = path;
-    images[p].style.display = 'none';
-    document.body.appendChild(images[p]);
-  };
-} 
-
-function preloadImages() {
-  return new Promise(resolve => { preload(imagePaths); resolve() });
 }

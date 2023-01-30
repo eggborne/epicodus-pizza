@@ -207,11 +207,13 @@ form > #option-input-area {
 }
 
 .preview-pizza {
+  background-image: url("../images/classicblank.png");
   position: relative;
-  background-size: contain;
-  background-position: center;
+  background-size: cover;
+  background-position-x: 50%;
   background-repeat: no-repeat;
   border-radius: 50%;
+  align-self: flex-start;
   width: 90vw;
   height: 90vw;
 }
@@ -225,19 +227,19 @@ form > #option-input-area {
 }
 
 .preview-pizza.small {
-  background-image: url("../images/smallblank.png");
+  background-position-x: 0%;
 }
 
 .preview-pizza.medium {
-  background-image: url("../images/mediumblank.png");
+  background-position-x: 33.333%;
 }
 
 .preview-pizza.large {
-  background-image: url("../images/largeblank.png");
+  background-position-x: 66.666%;
 }
 
 .preview-pizza.xl {
-  background-image: url("../images/xlblank.png");
+  background-position-x: 100%;
 }
 
 .topping {
@@ -250,16 +252,24 @@ form > #option-input-area {
   background-position: center;
   transform: scale(1.5);
   opacity: 0;
+  filter: drop-shadow(0 0 0.1rem #00000081);
   transition: transform 200ms ease-out, opacity 200ms ease;
 }
 
 #invoice-container {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: space-between;
+  display: none;
+  grid-template-rows: 3fr 6rem var(--header-height);
+  grid-template-columns: 1fr;
+  justify-content: stretch;
+  align-content: center;
   width: 100%;
+  max-width: 40rem;
+  align-self: center;
   flex-grow: 1;
+}
+
+main.ordering #invoice-container {
+  display: grid;
 }
 
 #invoice-area {
@@ -267,7 +277,34 @@ form > #option-input-area {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  align-self: center;
+  justify-content: flex-start;
+}
+
+#add-pizza-area {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0 1rem;
+  justify-self: flex-end;
+}
+
+#add-pizza-area > button {
+  font-weight: bold;
+  color: white;
+  background-color: green;
+  font-size: calc(var(--header-height) / 3.5);
+}
+
+#add-pizza-area #add-pizza-button {
+  background-color: rgb(113, 128, 0);
+  flex-grow: 1;
+}
+
+#add-pizza-area #check-out-button {
+  width: 5rem;
 }
 
 .invoice {
@@ -369,28 +406,25 @@ footer {
     align-self: flex-start;
     opacity: 0;
     transition: opacity 600ms ease;
-    pointer-events: none;
     display: flex;
     flex-direction: column;
-    /* justify-content: space-between; */
+    pointer-events: none;
+
   }
   
   main.ordering #output-area {
     opacity: 1;
+    pointer-events: all;
   }
   
   #preview-area {
     width: 50vw;
     height: 50vw;
     margin: 2rem;
+    align-self: center;
   }
 
   .preview-pizza {
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 50%;
     width: 90%;
     height: 90%;
   }
