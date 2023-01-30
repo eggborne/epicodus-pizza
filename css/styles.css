@@ -224,7 +224,7 @@ form > #option-input-area {
   left: 0;
   top: 0;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain;
   transform-origin: center;
   background-position: center;
 }
