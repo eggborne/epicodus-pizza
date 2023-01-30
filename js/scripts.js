@@ -17,7 +17,7 @@ function PizzaParlor() {
           small: { toppingAmount: 16, toppingSize: '21%', displayName: 'Small' },
           medium: { toppingAmount: 20, toppingSize: '18%', displayName: 'Medium' }, 
           large: { toppingAmount: 26, toppingSize: '15%', displayName: 'Large' },
-          xlarge: { toppingAmount: 36, toppingSize: '12%', displayName: 'XL' },
+          xl: { toppingAmount: 36, toppingSize: '12%', displayName: 'XL' },
         },
         toppings: {
           standard: {
@@ -43,11 +43,11 @@ function PizzaParlor() {
         },
       },
       priceData: {
-        sizes: { small: 7.95, medium: 9.95, large: 12.95, xlarge: 15.95, },
+        sizes: { small: 7.95, medium: 9.95, large: 12.95, xl: 15.95, },
         crusts: { handTossed: null, thin: 1, deepDish: 2, },
         toppings: { 
-          standard: { small: 0.95, medium: 1.95, large: 2.50, xlarge: 4.00, },
-          premium: { small: 1.95, medium: 2.95, large: 3.50, xlarge: 5.00, },
+          standard: { small: 0.95, medium: 1.95, large: 2.50, xl: 4.00, },
+          premium: { small: 1.95, medium: 2.95, large: 3.50, xl: 5.00, },
         }
       }
     }
@@ -106,12 +106,6 @@ Pizza.prototype.getToppingType = function(topping) {
 
 // UI logic
 
-PizzaParlor.prototype.produceDefaultPizza = function() {
-  this.addPizza('classic');
-  this.renderMenuForPizza(this.currentId);
-  this.renderPreviewForPizza(this.currentId);
-}
-
 PizzaParlor.prototype.renderMenuForPizza = function(pizzaId) {
   this.pizzas[pizzaId].createOptionInputs();
   this.pizzas[pizzaId].createOptionHandlers();
@@ -119,8 +113,9 @@ PizzaParlor.prototype.renderMenuForPizza = function(pizzaId) {
 
 PizzaParlor.prototype.renderPreviewForPizza = function(pizzaId) {
   let previewArea = document.getElementById(`preview-area`);
+  let pizza = this.pizzas[pizzaId];
   previewArea.innerHTML += `
-    <div class="preview-pizza" id="preview-pizza-${pizzaId}">
+    <div class="preview-pizza ${pizza.pizzaType} ${pizza.size}" id="preview-pizza-${pizzaId}">
       <span role="img" aria-label="A delicious pizza."></span>
     </div>
   `;
@@ -130,6 +125,13 @@ PizzaParlor.prototype.renderInvoiceForPizza = function(pizzaId) {
   let pizza = this.pizzas[pizzaId];
   pizza.printInvoice();
 };
+
+PizzaParlor.prototype.produceDefaultPizza = function() {
+  this.addPizza('classic');
+  this.renderMenuForPizza(this.currentId);
+  this.renderPreviewForPizza(this.currentId);
+  this.pizzas[this.currentId].printInvoice();
+}
 
 Pizza.prototype.createOptionInputs = function() {
   let sizeRadioArea = document.createElement('div');
@@ -176,7 +178,7 @@ Pizza.prototype.createOptionInputs = function() {
                     <div>$${this.priceData.toppings[itemKey].small.toFixed(2)}</div>
                     <div>$${this.priceData.toppings[itemKey].medium.toFixed(2)}</div>
                     <div>$${this.priceData.toppings[itemKey].large.toFixed(2)}</div>
-                    <div>$${this.priceData.toppings[itemKey].xlarge.toFixed(2)}</div>
+                    <div>$${this.priceData.toppings[itemKey].xl.toFixed(2)}</div>
                   <div>
                 </div>
               </div>
@@ -218,6 +220,7 @@ Pizza.prototype.createOptionHandlers = function() {
     optionInput.addEventListener('change', (e) => {
       if (e.target.checked) {
         if (optionInput.type === 'radio') {
+          this.changeBlank(this.size, e.target.value);
           this.size = e.target.value;
           this.resizeToppings();
         } else {
@@ -271,7 +274,7 @@ Pizza.prototype.printInvoice = function() {
 Pizza.prototype.renderTopping = function(topping, remove) {
   let pizzaElement = document.getElementById('preview-area');
   let pizzaImg = document.getElementById(`preview-pizza-${this.id}`);
-  let quantity = this.optionData.sizes[this.size].toppingAmount - (this.toppings.length);
+  let quantity = this.optionData.sizes[this.size].toppingAmount;
   if (!remove) {
     let imagePath = `images/toppings/${topping.toLowerCase()}.png`;
     let pizzaCenter = {
@@ -280,26 +283,27 @@ Pizza.prototype.renderTopping = function(topping, remove) {
     };
     let currentAngle = 1;
     for (let i=0; i < quantity; i++) {
-      console.log(currentAngle);
+      let currentDistanceLimits = i % 2 === 0 ? { min: 0.025, max: 0.4 } : { min: 0.5, max: 0.9 };
       let toppingElement = document.createElement('div');
       toppingElement.classList.add('topping', topping);
       toppingElement.style.backgroundImage = `url("${imagePath}")`;
       pizzaElement.append(toppingElement);
       let toppingSize = toppingElement.offsetWidth;
-      let maxRadius = (pizzaImg.offsetWidth / 2) -(toppingSize * 0.6);
+      let maxRadius = (pizzaImg.offsetWidth / 2) - (toppingSize * 0.5);
       let randomPosition = randomPointInCircle(
         pizzaCenter.x, 
         pizzaCenter.y, 
         maxRadius,
-        currentAngle
+        currentAngle,
+        // currentDistanceLimits
       );
       let randomX =  randomPosition.x - (toppingSize / 2);
       let randomY =  randomPosition.y - (toppingSize / 2);
       toppingElement.style.top = randomY + 'px';
       toppingElement.style.left = randomX + 'px';
-      toppingElement.style.transform = `rotate(${randomInt(0, 359)}deg)`;
+      toppingElement.style.opacity = 1;
+      toppingElement.style.transform = `scale(1) rotate(${randomInt(0, 180)}deg)`;
       currentAngle += 360 / quantity;
-
     }
   } else {
     [...document.getElementsByClassName(topping)].forEach((toppingElement) => {
@@ -317,6 +321,12 @@ Pizza.prototype.resizeToppings = function() {
   };
 };
 
+Pizza.prototype.changeBlank = function(oldSize, newSize) {
+  let newBGPath = `images/${this.size}blank.png`;
+  document.querySelector(`#preview-area > #preview-pizza-${this.id}`).classList.replace(oldSize, newSize);
+} 
+
+
 Pizza.prototype.clearToppings = function() {
   for (const topping in this.toppings) {
     this.renderTopping(this.toppings[topping], true);
@@ -328,12 +338,15 @@ Pizza.prototype.clearToppings = function() {
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 
+const randomArbitrary = (min, max) => Math.random() * (max - min) + min;
+
 const degreesToRadians = degrees => degrees * (Math.PI/180);
 
-const randomPointInCircle = (centerX, centerY, radius, angle, exactRadius) => {
+const randomPointInCircle = (centerX, centerY, radius, angle, limits, exactRadius) => {
   angle = degreesToRadians(angle) || Math.random() * 2 * Math.PI,
-  hypotenuse = exactRadius ? Math.sqrt(1) * radius : Math.sqrt(Math.random()) * radius,
-  adjacent = Math.cos(angle) * hypotenuse,
-  opposite = Math.sin(angle) * hypotenuse
+  distanceRandomizer = limits ? randomArbitrary(limits.min, limits.max) : Math.random();
+  hypotenuse = exactRadius ? Math.sqrt(1) * radius : Math.sqrt(distanceRandomizer) * radius;
+  adjacent = Math.cos(angle) * hypotenuse;
+  opposite = Math.sin(angle) * hypotenuse;
   return { x: centerX + adjacent, y: centerY + opposite };
 };
