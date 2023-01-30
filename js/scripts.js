@@ -1,11 +1,22 @@
-window.addEventListener('load', function() {
+let jsStarted = Date.now();
+
+const imagePaths = [
+  'images/smallblank.png',
+  'images/mediumblank.png',
+  'images/largeblank.png',
+  'images/xlblank.png',
+];
+
+
+window.addEventListener('load', async function() {
   document.getElementById('start-order-button').addEventListener('click', function(e) {
     e.preventDefault();
-    let parlor = new PizzaParlor();
-    parlor.produceDefaultPizza();
+    new PizzaParlor().produceDefaultPizza();
     document.querySelector('header').classList.add('ordering');
     document.querySelector('main').classList.add('ordering');
   });
+  await preloadImages();
+  console.log('loaded', imagePaths.length, 'images in', (Date.now() - jsStarted));
 });
 
 function PizzaParlor() {
@@ -217,7 +228,7 @@ Pizza.prototype.createOptionHandlers = function() {
   });
   let optionInputs = document.getElementsByTagName('input');
   for (const optionInput of optionInputs) {
-    optionInput.addEventListener('change', (e) => {
+    optionInput.addEventListener('change', async (e) => {
       if (e.target.checked) {
         if (optionInput.type === 'radio') {
           this.changeBlank(this.size, e.target.value);
@@ -226,11 +237,14 @@ Pizza.prototype.createOptionHandlers = function() {
         } else {
           this.toppings.push(e.target.value);
           this.renderTopping(e.target.value);
+          await pause(100)
+          giveClassForDuration(document.getElementById(`preview-pizza-${this.id}`), 'dipping', 200);
         }
       } else {
         if (this.toppings.indexOf(e.target.value) !== -1) {
           this.toppings.splice(this.toppings.indexOf(e.target.value), 1);
           this.renderTopping(e.target.value, true);
+          giveClassForDuration(document.getElementById(`preview-pizza-${this.id}`), 'jumping', 200);
         }
       }
       document.querySelector('#total-price-display > span').innerText = this.getPriceTotal().toFixed(2);
@@ -272,30 +286,29 @@ Pizza.prototype.printInvoice = function() {
 };
 
 Pizza.prototype.renderTopping = function(topping, remove) {
-  let pizzaElement = document.getElementById('preview-area');
   let pizzaImg = document.getElementById(`preview-pizza-${this.id}`);
   let quantity = this.optionData.sizes[this.size].toppingAmount;
   if (!remove) {
     let imagePath = `images/toppings/${topping.toLowerCase()}.png`;
     let pizzaCenter = {
-      x: pizzaElement.clientLeft + (pizzaElement.clientWidth / 2),
-      y: pizzaElement.clientTop + (pizzaElement.clientHeight / 2),
+      x: pizzaImg.clientLeft + (pizzaImg.clientWidth / 2),
+      y: pizzaImg.clientTop + (pizzaImg.clientHeight / 2),
     };
-    let currentAngle = 1;
+    let currentAngle = randomInt(1, 359);
     for (let i=0; i < quantity; i++) {
-      let currentDistanceLimits = i % 2 === 0 ? { min: 0.025, max: 0.4 } : { min: 0.5, max: 0.9 };
+      let currentDistanceLimits = i % 2 === 0 ? { min: 0.01, max: 0.4 } : { min: 0.5, max: 0.9 };
       let toppingElement = document.createElement('div');
       toppingElement.classList.add('topping', topping);
       toppingElement.style.backgroundImage = `url("${imagePath}")`;
-      pizzaElement.append(toppingElement);
-      let toppingSize = toppingElement.offsetWidth;
-      let maxRadius = (pizzaImg.offsetWidth / 2) - (toppingSize * 0.5);
+      pizzaImg.append(toppingElement);
+      let toppingSize = toppingElement.clientWidth;
+      let maxRadius = (pizzaImg.clientWidth / 2) - (toppingSize * 0.5);
       let randomPosition = randomPointInCircle(
         pizzaCenter.x, 
         pizzaCenter.y, 
         maxRadius,
         currentAngle,
-        // currentDistanceLimits
+        currentDistanceLimits
       );
       let randomX =  randomPosition.x - (toppingSize / 2);
       let randomY =  randomPosition.y - (toppingSize / 2);
@@ -306,7 +319,10 @@ Pizza.prototype.renderTopping = function(topping, remove) {
       currentAngle += 360 / quantity;
     }
   } else {
-    [...document.getElementsByClassName(topping)].forEach((toppingElement) => {
+    [...document.getElementsByClassName(topping)].forEach(async (toppingElement) => {
+      toppingElement.style.opacity = 0;
+      toppingElement.style.transform = `scale(1.5)`;
+      await pause(200);
       toppingElement.parentElement.removeChild(toppingElement);
     });
   }
@@ -336,17 +352,36 @@ Pizza.prototype.clearToppings = function() {
 
 // Utillity functions
 
+const pause = async (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-
 const randomArbitrary = (min, max) => Math.random() * (max - min) + min;
-
 const degreesToRadians = degrees => degrees * (Math.PI/180);
-
 const randomPointInCircle = (centerX, centerY, radius, angle, limits, exactRadius) => {
-  angle = degreesToRadians(angle) || Math.random() * 2 * Math.PI,
-  distanceRandomizer = limits ? randomArbitrary(limits.min, limits.max) : Math.random();
-  hypotenuse = exactRadius ? Math.sqrt(1) * radius : Math.sqrt(distanceRandomizer) * radius;
-  adjacent = Math.cos(angle) * hypotenuse;
-  opposite = Math.sin(angle) * hypotenuse;
+  angle = degreesToRadians(angle) || Math.random() * 2 * Math.PI;
+  let distanceRandomizer = limits ? randomArbitrary(limits.min, limits.max) : Math.random();
+  let hypotenuse = exactRadius ? Math.sqrt(1) * radius : Math.sqrt(distanceRandomizer) * radius;
+  let adjacent = Math.cos(angle) * hypotenuse;
+  let opposite = Math.sin(angle) * hypotenuse;
   return { x: centerX + adjacent, y: centerY + opposite };
 };
+const giveClassForDuration = (element, className, duration) => {
+  element.classList.add(className);
+  setTimeout(() => {
+    element.classList.remove(className);
+  }, duration);
+}
+
+function preload(arr) {
+  let images = [];
+  for (let p = 0; p < arr.length; p++) {
+    let path = arr[p];
+    images[p] = new Image();
+    images[p].src = path;
+    images[p].style.display = 'none';
+    document.body.appendChild(images[p]);
+  };
+} 
+
+function preloadImages() {
+  return new Promise(resolve => { preload(imagePaths); resolve() });
+}
